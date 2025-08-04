@@ -1,0 +1,17 @@
+# Temporary files
+cookies.txt
+*.log
+*.tmp
+*.swp
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Docker
+.env

@@ -1,0 +1,18 @@
+version: '3.8'
+services:
+  lab:
+    build: .
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+ # Attacker Server (Token Capture)
+  attacker-server:
+    build: ./attacker-server
+    container_name: phishing-attacker-server
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./attacker-server:/app
+      - ./attacker-server/logs:/app/logs
+    networks:
+      - default

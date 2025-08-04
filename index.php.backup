@@ -1,0 +1,76 @@
+<?php
+session_start();
+$FLAG = "THM{P455W0RD_R353T_3XPL01T3D}";
+
+if (!isset($_SESSION['tokens'])) {
+    $_SESSION['tokens'] = [];
+}
+
+if (isset($_POST['request_reset'])) {
+    $email = $_POST['email'];
+    $token = bin2hex(random_bytes(16));
+    $_SESSION['tokens'][$token] = $email;
+    
+    // Vulnerable reset link generation
+    $reset_link = "http://".$_SERVER['HTTP_HOST']."/?token=$token";
+    
+    echo "<div style='border:1px solid #ccc;padding:10px;margin:10px;'>";
+    echo "<h3>Password Reset Link (Would be emailed):</h3>";
+    echo "<a href='$reset_link'>$reset_link</a>";
+    echo "</div>";
+}
+
+if (isset($_GET['token']) && isset($_POST['new_password'])) {
+    $token = $_GET['token'];
+    if (isset($_SESSION['tokens'][$token])) {
+        echo "<div style='border:1px solid green;padding:10px;margin:10px;'>";
+        echo "<h2>FLAG: $FLAG</h2>";
+        echo "<p>Password changed successfully!</p>";
+        echo "</div>";
+    } else {
+        echo "<div style='border:1px solid red;padding:10px;margin:10px;'>Invalid token!</div>";
+    }
+}
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Password Reset Lab</title>
+    <style>
+        body { font-family: Arial; max-width: 800px; margin: 0 auto; padding: 20px; }
+        form { margin: 20px 0; }
+        input, button { padding: 8px; margin: 5px 0; width: 300px; }
+    </style>
+</head>
+<body>
+    <h1>Password Reset Lab</h1>
+    
+    <?php if(!isset($_GET['token'])): ?>
+        <h2>Request Password Reset</h2>
+        <form method="post">
+            <input type="email" name="email" placeholder="user@example.com" required>
+            <button type="submit" name="request_reset">Get Reset Link</button>
+        </form>
+    <?php else: ?>
+        <h2>Set New Password</h2>
+        <form method="post">
+            <input type="password" name="new_password" placeholder="New password" required>
+            <button type="submit">Change Password</button>
+        </form>
+    <?php endif; ?>
+    
+    <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
+        <h3>Lab Instructions</h3>
+        <ol>
+            <li>Request password reset for any email</li>
+            <li>Intercept the request and modify Host header</li>
+            <li>Get victim to click malicious link</li>
+            <li>Capture token and change password</li>
+            <li>Submit the flag that appears</li>
+        </ol>
+        
+        <h4>Example Attack Command:</h4>
+        <code>curl -X POST http://localhost:8080/ -H "Host: attacker.com" -d "email=victim@example.com"</code>
+    </div>
+</body>
+</html>
